@@ -1,25 +1,25 @@
 // Vertex shader program
 var VSHADER_SOURCE =
-  'attribute vec4 a_Position;\n' +//attribute per dati che differiscono per ogni vertice
+  'attribute vec4 a_Position;\n' +
   'attribute vec4 a_Normal;\n' +
   'attribute vec4 a_Weight;\n' +  
   'attribute vec4 a_Color;\n' + 
   'attribute vec2 a_TexCoord;\n' +  
-  'uniform mat4 u_VpMatrix;\n' +//uniform per dati uguali in ogni vertice
+  'uniform mat4 u_VpMatrix;\n' +
   'uniform mat4 u_BoneMatrix[2];\n' +  
   'uniform mat4 u_NormalMatrix;\n' +
-  'varying vec4 v_Color;\n' +//varying per variabili che vengono passate al fragment shader
+  'varying vec4 v_Color;\n' +
   'varying vec2 v_TexCoord;\n' +  
   'void main() {\n' +
   // Weight normalization factor
   '  float normfac = 1.0 / (a_Weight[0] + a_Weight[1]);\n' +  
   '  gl_Position = u_VpMatrix * normfac * (u_BoneMatrix[0] * a_Position * a_Weight[0] + u_BoneMatrix[1] * a_Position * a_Weight[1]);\n' +
   // Shading calculation to make the arm look three-dimensional
-  '  vec3 lightDirection = normalize(vec3(0.0, 0.5, 0.7));\n' + //viene normalizzata per evitare che il colore della superficie diventi troppo scuro o troppo chiaro
+  '  vec3 lightDirection = normalize(vec3(0.0, 0.5, 0.7));\n' + 
   '  vec4 color = a_Color;\n' +  // Robot color
   '  vec3 normal = normalize((u_NormalMatrix * a_Normal).xyz);\n' +
-  '  float nDotL = max(dot(normal, lightDirection), 0.0);\n' +//il prodotto scalare(dot) tra normale(=orientazione della superficie) e direzione della luce ci dà l'angolo
-  '  v_Color = vec4(color.rgb * nDotL + vec3(0.1), color.a);\n' +//diffuse reflection
+  '  float nDotL = max(dot(normal, lightDirection), 0.0);\n' +
+  '  v_Color = vec4(color.rgb * nDotL + vec3(0.1), color.a);\n' +
   ' v_TexCoord = a_TexCoord;\n' +
   '}\n';
 
@@ -68,7 +68,7 @@ function main() {
   
   // Set the clear color and enable the depth test
   gl.clearColor(0.6, 0.8, 1.0, 1.0);
-  gl.enable(gl.DEPTH_TEST);//abilita la rimozione di superfici nascoste dietro altri oggetti, per rimuovere richiede gl.clear(gl.DEPTH_BUFFER_BIT) (vedi draw())
+  gl.enable(gl.DEPTH_TEST);
 
   // Get the storage locations of uniform variables
   var u_VpMatrix = gl.getUniformLocation(gl.program, 'u_VpMatrix');
@@ -82,14 +82,13 @@ function main() {
 
   // Calculate the view projection matrix
   var viewProjMatrix = new Matrix4();
-  viewProjMatrix.setPerspective(52.0, canvas.width / canvas.height, 1.0, 100.0);//setPerspective(fov, aspect, near, far) pag.257
-  viewProjMatrix.lookAt(0.0, 0.0, 40.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);//setLookAt(eyeX, eyeY, eyeZ, atX, atY, atZ, upX, upY, upZ) pag.228
+  viewProjMatrix.setPerspective(52.0, canvas.width / canvas.height, 1.0, 100.0);
+  viewProjMatrix.lookAt(0.0, 0.0, 40.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
-  img_path1 = '33879.png'; //body   
-  img_path2 = 'avatar-stormtrooper-256.png'; //head 
-  img_path3 = 'white.jpg'; //floor
+  img_path1 = 'textures/body.jpg'; //body   
+  img_path2 = 'textures/stormtrooper.jpg'; //head 
+  img_path3 = 'textures/white.jpg'; //floor
   
-  // Set texture1 body
   if (!initTextures(gl, n, canvas, img_path1, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, 1)) {
     console.log('Failed to intialize the texture 1.');
     return;
@@ -101,15 +100,14 @@ function main() {
 
 var ANGLE_STEP = 3.0;     // The increments of rotation angle (degrees)
 
-//inizializzazione angoli di rotazione
 var g_torsoAngle = 0.0;
 var g_headAngle = 0.0;
-var g_leftUpperArmAnglez = 90.0;//non cambia
-var g_leftUpperArmAnglex = 0.0;//cambia coi tasti x,z
-var g_leftLowerArmAngle = 0.0;//all'inizio è già ruotato di 90 grazie  a g_leftUpArmAngle
-var g_rightUpperArmAnglez = -90.0;//non cambia
-var g_rightUpperArmAnglex = 0.0;//cambia coi tasti x,z
-var g_rightLowerArmAngle = 0.0;//all'inizio è già ruotato di -90 grazie  a g_rightUpArmAngle
+var g_leftUpperArmAnglez = 90.0;
+var g_leftUpperArmAnglex = 0.0;
+var g_leftLowerArmAngle = 0.0;
+var g_rightUpperArmAnglez = -90.0;
+var g_rightUpperArmAnglex = 0.0;
+var g_rightLowerArmAngle = 0.0;
 var g_leftUpperLegAngle = 180.0;
 var g_leftLowerLegAngle = 0.0;
 var g_rightUpperLegAngle = -180.0;
@@ -129,11 +127,11 @@ function keydown(ev, gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMa
     case 38: // Down arrow key -> the negative rotation of head around the z-axis
       if (g_headAngle > -45.0) g_headAngle -= ANGLE_STEP;
       break;
-    case 90: // 'ｚ'key -> the positive rotation of arms
+    case 90: // 'ｚ'key -> the positive rotation of upper arms
       if (g_leftUpperArmAnglex > 0.0) g_leftUpperArmAnglex = (g_leftUpperArmAnglex - ANGLE_STEP) % 360;
       if (g_rightUpperArmAnglex > 0.0) g_rightUpperArmAnglex = (g_rightUpperArmAnglex - ANGLE_STEP) % 360;
       break; 
-    case 88: // 'x'key -> the negative rotation of arms
+    case 88: // 'x'key -> the negative rotation upper of arms
       if (g_leftUpperArmAnglex < 90.0) g_leftUpperArmAnglex = (g_leftUpperArmAnglex + ANGLE_STEP) % 360;
       if (g_rightUpperArmAnglex < 90.0) g_rightUpperArmAnglex = (g_rightUpperArmAnglex + ANGLE_STEP) % 360;
       break;
@@ -156,9 +154,9 @@ function keydown(ev, gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMa
     default: return; // Skip drawing at no effective action
   }   
   
-　 draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture1); // Draw the robot arm  
-　 draw2(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture2); // Draw the robot arm
-　 draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture3); // Draw the robot arm  	    	  
+　 draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture1); // Draw body  
+　 draw2(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture2); // Draw head
+　 draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture3); // Draw floor  	    	  
 }
 
 function initVertexBuffers(gl) {
@@ -196,7 +194,6 @@ function initVertexBuffers(gl) {
     0.5, 0.5, -0.5,  0.0, 0.5, -0.5,  0.0, 0.0, -0.5,  0.5, 0.0, -0.5		
   ]);
 
-  // Normal
   var normals = new Float32Array([
     0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0, // front
     0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0,  0.0, 0.0, 1.0, 
@@ -257,8 +254,7 @@ function initVertexBuffers(gl) {
     92,93,94,  92,94,95	
   ]);
 
-  // Write the vertex property to buffers (coordinates, normals)
-  if (!initArrayBuffer(gl, 'a_Position', vertices, gl.FLOAT, 3)) return -1;//3 sarà usato per specificare il numero di componenti per vertice nel buffer object
+  if (!initArrayBuffer(gl, 'a_Position', vertices, gl.FLOAT, 3)) return -1;
   if (!initArrayBuffer(gl, 'a_Normal', normals, gl.FLOAT, 3)) return -1;
 
   // Unbind the buffer object
@@ -284,8 +280,8 @@ function initArrayBuffer(gl, attribute, data, type, num) {
     return false;
   }
   // Write date into the buffer object
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);//gl.bindBuffer(target, buffer) abilita il buffer object e lo lega al target; gl.ARRAY_BUFFER specifica che il buffer contiene vertici pag.75 
-  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);//gl.bufferData(target, data, usage) scrive i dati(data) nel buffer legato al target pag.77
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer); 
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
 
   // Assign the buffer object to the attribute variable
   var a_attribute = gl.getAttribLocation(gl.program, attribute);
@@ -293,8 +289,8 @@ function initArrayBuffer(gl, attribute, data, type, num) {
     console.log('Failed to get the storage location of ' + attribute);
     return false;
   }
-  gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);//gl.vertexAttribPointer(location, size, type, normalized, stride,offset) assegna il buffer object legato a gl.ARRAY_BUFFER alla attribute variable specificata da location
-															  //size=numero di componenti per vertice nel buffer object
+  gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
+  
   // Enable the assignment of the buffer object to the attribute variable
   gl.enableVertexAttribArray(a_attribute);
 
@@ -316,7 +312,6 @@ function initTextures(gl, n, canvas, img_path, viewProjMatrix, u_VpMatrix, u_Nor
   }
 
   var image = new Image();  // Create image object
-  image.crossOrigin = "anonymous";//aggiunto da eugenio perchè dava cross origin error
   if (!image) {
     console.log('Failed to create the Image object');
     return null;
@@ -367,7 +362,7 @@ function initTextures(gl, n, canvas, img_path, viewProjMatrix, u_VpMatrix, u_Nor
  };
 
   // Tell the browser to load an Image  
-  image.src = img_path;//deve stare nella stessa cartella del javascript sennò non lo trova
+  image.src = img_path;
   
   return true;
 }
@@ -380,18 +375,17 @@ var g_BoneMatrix0 = new Matrix4(), g_BoneMatrix1 = new Matrix4(), g_BoneMatrix2 
   var neckHeight = torsoHeight/5;
   var neckWidth = torsoWidth/4;
   var neckDepth = torsoDepth/4;  
-  
-function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture) {
-  console.log('draw body');
 
+//draw body  
+function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture) {
   // Clear color and depth buffer
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  //0 Draw torso
+  //Torso
   g_BoneMatrix0.setTranslate(0.0, -6.0, 0.0);
-  g_BoneMatrix0.rotate(g_torsoAngle, 0.0, 1.0, 0.0);  // Rotate around the y-axis rotate(ANGLE,x,y,z)
+  g_BoneMatrix0.rotate(g_torsoAngle, 0.0, 1.0, 0.0);
   
-  var weightTorso = new Float32Array([//vanno messi nell'ordine dei vertici
+  var weightTorso = new Float32Array([
     1.0, 0.0,	1.0, 0.0,	1.0, 0.0,	1.0, 0.0, //front
     1.0, 0.0,	1.0, 0.0,	1.0, 0.0,	1.0, 0.0, 
 	1.0, 0.0,	1.0, 0.0,	1.0, 0.0,	1.0, 0.0, 				
@@ -431,9 +425,9 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   
   g_BoneMatrix0.scale(torsoWidth, torsoHeight, torsoDepth);
 
-  //1 Draw neck
+  //Neck
   g_BoneMatrix1 = popMatrix();
-  g_BoneMatrix1.translate(0.0, torsoHeight, 0.0);     // Move onto the torso
+  g_BoneMatrix1.translate(0.0, torsoHeight, 0.0);  
 
   var weightNeck = new Float32Array([
     0.8, 0.2,	0.8, 0.2,	0.9, 0.1,	0.9, 0.1, //front
@@ -475,12 +469,12 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   g_BoneMatrix1.scale(neckWidth, neckHeight, neckDepth);
 
   g_BoneMatrix10.translate(0.0, neckHeight, 0.0);
-  g_BoneMatrix10.rotate(g_headAngle, 1.0, 0.0, 0.0);  // Rotate around the x-axis
+  g_BoneMatrix10.rotate(g_headAngle, 1.0, 0.0, 0.0);  
   g_BoneMatrix10.scale(headWidth, headHeight, headDepth);  
   
   g_BoneMatrix2 = popMatrix();
  
-  //2 leftUpperArm
+  //LeftUpperArm
   var leftUpperArmLength = torsoHeight/3;
   g_BoneMatrix2.translate(-torsoWidth/2, torsoHeight-2.0, 0.0);
   g_BoneMatrix2.rotate(g_leftUpperArmAnglez, 0.0, 0.0, 1.0);  // Rotate around the z-axis
@@ -488,7 +482,7 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
 
   var weightLeftUpperArm = weightNeck;  
   
-  //3 leftLowerArm
+  //LeftLowerArm
   var leftLowerArmLength = torsoHeight/3;
 
   g_BoneMatrix3.set(g_BoneMatrix2);
@@ -533,7 +527,7 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   
   g_BoneMatrix4 = popMatrix();
   
-  //4 rightUpperArm
+  //RightUpperArm
   var rightUpperArmLength = torsoHeight/3;
   g_BoneMatrix4.translate(torsoWidth/2, torsoHeight-2.0, 0.0);
   g_BoneMatrix4.rotate(g_rightUpperArmAnglez, 0.0, 0.0, 1.0);
@@ -541,7 +535,7 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
 
   var weightRightUpperArm = weightNeck;  
   
-  //5 rightLowerArm
+  //RightLowerArm
   var rightLowerArmLength = torsoHeight/3;
   g_BoneMatrix5.set(g_BoneMatrix4); 
 
@@ -555,14 +549,14 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   
   g_BoneMatrix6 = popMatrix();
  
-  //6 leftUpperLeg
+  //LeftUpperLeg
   var leftUpperLegLength = torsoHeight/2;
   g_BoneMatrix6.translate(-(torsoWidth/2)+leftUpperLegLength/2, 0.0, 0.0);
   g_BoneMatrix6.rotate(g_leftUpperLegAngle, 0.0, 0.0, 1.0);  // Rotate around the y-axis  
   
   var weightLeftUpperLeg = weightNeck;     
   
-  //7 leftLowerLeg
+  //LeftLowerLeg
   var leftLowerLegLength = torsoHeight/2;
   g_BoneMatrix7.set(g_BoneMatrix6);
 
@@ -576,14 +570,14 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   
   g_BoneMatrix8 = popMatrix();
  
-  //8 rightUpperLeg
+  //RightUpperLeg
   var rightUpperLegLength = torsoHeight/2;
   g_BoneMatrix8.translate((torsoWidth/2)-rightUpperLegLength/2, 0.0, 0.0);
   g_BoneMatrix8.rotate(g_rightUpperLegAngle, 0.0, 0.0, 1.0);  // Rotate around the y-axis
 
   var weightRightUpperLeg = weightNeck;  
   
-  //9 rightLowerLeg
+  //RightLowerLeg
   var rightLowerLegLength = torsoHeight/2;
   g_BoneMatrix9.set(g_BoneMatrix8);
 
@@ -595,7 +589,7 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
  
   var weightRightLowerLeg = weightLeftLowerArm; 
 	
-  var colors = new Float32Array([     // Colors
+  var colors = new Float32Array([   
     1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0, //front
     1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 
     1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 		
@@ -676,10 +670,8 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   drawBox(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, g_BoneMatrix8, g_BoneMatrix9, weightRightLowerLeg, texture); 
 }
 
-function draw2(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture) {
-  console.log('draw2 head');
-  
-  //Draw head
+//Draw head
+function draw2(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture) {  
   var weightHead = new Float32Array([
 	1.0,0.0,	1.0,0.0,	0.9,0.1,	0.9,0.1, //front
 	1.0,0.0,	1.0,0.0,	0.9,0.1,	0.9,0.1, 
@@ -784,15 +776,13 @@ function draw2(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0,
   drawBox(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, g_BoneMatrix10, g_BoneMatrix1, weightHead, texture);  
 }
 
+//Draw floor
 function draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture) { 
- /////////////////////////FLOOR////////////////////////////
-  console.log('draw3 floor');
-
   g_BoneMatrix11.setTranslate(0.0, -6.0, 0.0);
-  g_BoneMatrix11.rotate(g_torsoAngle, 0.0, 1.0, 0.0);  // Rotate around the y-axis rotate(ANGLE,x,y,z)
+  g_BoneMatrix11.rotate(g_torsoAngle, 0.0, 1.0, 0.0);  
   
   g_BoneMatrix11.translate(0.0, -12.0, 0.0);
-  g_BoneMatrix11.rotate(180.0, 0.0, 0.0, 1.0);  // Rotate around the z-axis    
+  g_BoneMatrix11.rotate(180.0, 0.0, 0.0, 1.0);  
   g_BoneMatrix11.scale(80.0, 0.1, 80.0);
   
     var weightFloor = new Float32Array([
@@ -827,7 +817,7 @@ function draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0,
 	0.0, 1.0,	0.0, 1.0,	0.0, 1.0,	0.0, 1.0,	
   ]); 
   
-    colors = new Float32Array([     // green
+    colors = new Float32Array([    
     0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1, //front
     0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1, 
     0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1, 			
@@ -899,19 +889,18 @@ function draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0,
   drawBox(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, g_BoneMatrix8, g_BoneMatrix11, weightFloor, texture); // Draw9  
 }
 
-var g_matrixStack = []; // Array for storing a matrix
-function pushMatrix(m) { // Store the specified matrix to the array
+var g_matrixStack = []; 
+function pushMatrix(m) { 
   var m2 = new Matrix4(m);
   g_matrixStack.push(m2);
 }
 
-function popMatrix() { // Retrieve the matrix from the array
+function popMatrix() {
   return g_matrixStack.pop();
 }
 
-var g_normalMatrix = new Matrix4(), g_VpMatrix = new Matrix4();  // Coordinate transformation matrix for normals
+var g_normalMatrix = new Matrix4(), g_VpMatrix = new Matrix4();  
 
-// Draw rectangular solid
 function drawBox(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, g_BoneMatrix0, g_BoneMatrix1, weights, texture) {
     if (!initArrayBuffer(gl, 'a_Weight', weights, gl.FLOAT, 2)) return -1;
 
@@ -921,7 +910,7 @@ function drawBox(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix
 	
     // Calculate the view project matrix and pass it to u_VpMatrix
     g_VpMatrix.set(viewProjMatrix);
-    gl.uniformMatrix4fv(u_VpMatrix, false, g_VpMatrix.elements);//gl.uniformMatrix4fv (location, transpose, array)
+    gl.uniformMatrix4fv(u_VpMatrix, false, g_VpMatrix.elements);
 	
     gl.uniformMatrix4fv(u_BoneMatrix0, false, g_BoneMatrix0.elements);	
     gl.uniformMatrix4fv(u_BoneMatrix1, false, g_BoneMatrix1.elements);	
@@ -931,5 +920,5 @@ function drawBox(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix
     g_normalMatrix.transpose();
     gl.uniformMatrix4fv(u_NormalMatrix, false, g_normalMatrix.elements);
     // Draw
-    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);//gl.drawElements(mode, count, type, offset) pag.278
+    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 }
