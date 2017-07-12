@@ -14,7 +14,7 @@ var VSHADER_SOURCE =
   // Weight normalization factor
   '  float normfac = 1.0 / (a_Weight[0] + a_Weight[1]);\n' +  
   '  gl_Position = u_VpMatrix * normfac * (u_BoneMatrix[0] * a_Position * a_Weight[0] + u_BoneMatrix[1] * a_Position * a_Weight[1]);\n' +
-  // Shading calculation to make the arm look three-dimensional
+  // Shading calculation to make the humanoid look three-dimensional
   '  vec3 lightDirection = normalize(vec3(0.0, 0.5, 0.7));\n' + 
   '  vec4 color = a_Color;\n' +  // Robot color
   '  vec3 normal = normalize((u_NormalMatrix * a_Normal).xyz);\n' +
@@ -139,7 +139,7 @@ function keydown(ev, gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMa
       if (g_leftLowerArmAngle > 0.0)  g_leftLowerArmAngle = (g_leftLowerArmAngle - ANGLE_STEP) % 360;
       if (g_rightLowerArmAngle > 0.0)  g_rightLowerArmAngle = (g_rightLowerArmAngle - ANGLE_STEP) % 360;
       break;
-    case 86: // 'v'key -> the nagative rotation of lower arms
+    case 86: // 'v'key -> the negative rotation of lower arms
       if (g_leftLowerArmAngle < 90.0) g_leftLowerArmAngle = (g_leftLowerArmAngle + ANGLE_STEP) % 360;
       if (g_rightLowerArmAngle < 90.0) g_rightLowerArmAngle = (g_rightLowerArmAngle + ANGLE_STEP) % 360;
       break;
@@ -147,7 +147,7 @@ function keydown(ev, gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMa
       if (g_leftLowerLegAngle < 0.0)  g_leftLowerLegAngle = (g_leftLowerLegAngle + ANGLE_STEP) % 360;
       if (g_rightLowerLegAngle < 0.0)  g_rightLowerLegAngle = (g_rightLowerLegAngle + ANGLE_STEP) % 360;
       break;
-    case 83: // 's'key -> the nagative rotation of lower legs
+    case 83: // 's'key -> the negative rotation of lower legs
       if (g_leftLowerLegAngle > -90.0) g_leftLowerLegAngle = (g_leftLowerLegAngle - ANGLE_STEP) % 360;
       if (g_rightLowerLegAngle > -90.0) g_rightLowerLegAngle = (g_rightLowerLegAngle - ANGLE_STEP) % 360;
       break;
@@ -159,8 +159,7 @@ function keydown(ev, gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMa
 　 draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture3); // Draw floor  	    	  
 }
 
-function initVertexBuffers(gl) {
-		
+function initVertexBuffers(gl) {		
   // Coordinates（Cube which length of one side is 1 with the origin on the center of the bottom)
   var vertices = new Float32Array([
     0.5, 1.0, 0.5,  0.0, 1.0, 0.5,  0.0, 0.5, 0.5,  0.5, 0.5, 0.5, //first quadrant - front
@@ -355,9 +354,9 @@ function initTextures(gl, n, canvas, img_path, viewProjMatrix, u_VpMatrix, u_Nor
   if(texnum == 3){ 
 	texture3 = texture;
   
-	draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture1); // Draw the robot arm  
-	draw2(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture2); // Draw the robot arm	
-	draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture3); // Draw the robot arm
+	draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture1); // Draw the robot body  
+	draw2(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture2); // Draw the robot head	
+	draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture3); // Draw floor
   }
  };
 
@@ -376,7 +375,7 @@ var g_BoneMatrix0 = new Matrix4(), g_BoneMatrix1 = new Matrix4(), g_BoneMatrix2 
   var neckWidth = torsoWidth/4;
   var neckDepth = torsoDepth/4;  
 
-//draw body  
+//Draw body  
 function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, texture) {
   // Clear color and depth buffer
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -471,14 +470,14 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   g_BoneMatrix10.translate(0.0, neckHeight, 0.0);
   g_BoneMatrix10.rotate(g_headAngle, 1.0, 0.0, 0.0);  
   g_BoneMatrix10.scale(headWidth, headHeight, headDepth);  
-  
+
+  //LeftUpperArm  
   g_BoneMatrix2 = popMatrix();
  
-  //LeftUpperArm
   var leftUpperArmLength = torsoHeight/3;
   g_BoneMatrix2.translate(-torsoWidth/2, torsoHeight-2.0, 0.0);
-  g_BoneMatrix2.rotate(g_leftUpperArmAnglez, 0.0, 0.0, 1.0);  // Rotate around the z-axis
-  g_BoneMatrix2.rotate(g_leftUpperArmAnglex, 1.0, 0.0, 0.0);  // Rotate around the x-axis (perchè è come se fosse verticale anche se è stato prima ruotato lungo z)
+  g_BoneMatrix2.rotate(g_leftUpperArmAnglez, 0.0, 0.0, 1.0);  
+  g_BoneMatrix2.rotate(g_leftUpperArmAnglex, 1.0, 0.0, 0.0);
 
   var weightLeftUpperArm = weightNeck;  
   
@@ -490,7 +489,7 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   g_BoneMatrix2.scale(3.0, leftUpperArmLength, 3.0);  
   
   g_BoneMatrix3.translate(0.0, leftUpperArmLength, 0.0); 
-  g_BoneMatrix3.rotate(-g_leftLowerArmAngle, 0.0, 0.0, 1.0);  // Rotate around the z-axis
+  g_BoneMatrix3.rotate(-g_leftLowerArmAngle, 0.0, 0.0, 1.0); 
   g_BoneMatrix3.scale(2.5, leftLowerArmLength+1.0, 2.5);
 
   var weightLeftLowerArm = new Float32Array([
@@ -525,13 +524,14 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
 	0.1,0.9,	0.1,0.9,	0.2,0.8,	0.2,0.8,
   ]);  
   
+
+  //RightUpperArm
   g_BoneMatrix4 = popMatrix();
   
-  //RightUpperArm
   var rightUpperArmLength = torsoHeight/3;
   g_BoneMatrix4.translate(torsoWidth/2, torsoHeight-2.0, 0.0);
   g_BoneMatrix4.rotate(g_rightUpperArmAnglez, 0.0, 0.0, 1.0);
-  g_BoneMatrix4.rotate(g_rightUpperArmAnglex, 1.0, 0.0, 0.0);  // Rotate around the x-axis (perchè è come se fosse verticale anche se è stato prima ruotato lungo z)  
+  g_BoneMatrix4.rotate(g_rightUpperArmAnglex, 1.0, 0.0, 0.0);    
 
   var weightRightUpperArm = weightNeck;  
   
@@ -542,17 +542,17 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   g_BoneMatrix4.scale(3.0, rightUpperArmLength, 3.0);
   
   g_BoneMatrix5.translate(0.0, rightUpperArmLength, 0.0);       
-  g_BoneMatrix5.rotate(g_rightLowerArmAngle, 0.0, 0.0, 1.0);  // Rotate around the z-axis
+  g_BoneMatrix5.rotate(g_rightLowerArmAngle, 0.0, 0.0, 1.0);  
   g_BoneMatrix5.scale(2.5, rightLowerArmLength+1.0, 2.5);  
 
   var weightRightLowerArm = weightLeftLowerArm;
   
+  //LeftUpperLeg
   g_BoneMatrix6 = popMatrix();
  
-  //LeftUpperLeg
   var leftUpperLegLength = torsoHeight/2;
   g_BoneMatrix6.translate(-(torsoWidth/2)+leftUpperLegLength/2, 0.0, 0.0);
-  g_BoneMatrix6.rotate(g_leftUpperLegAngle, 0.0, 0.0, 1.0);  // Rotate around the y-axis  
+  g_BoneMatrix6.rotate(g_leftUpperLegAngle, 0.0, 0.0, 1.0);  
   
   var weightLeftUpperLeg = weightNeck;     
   
@@ -563,17 +563,17 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   g_BoneMatrix6.scale(3.0, leftUpperLegLength, 3.0);
   
   g_BoneMatrix7.translate(0.0, leftUpperLegLength, 0.0); 
-  g_BoneMatrix7.rotate(g_leftLowerLegAngle, 1.0, 0.0, 0.0);  // Rotate around the z-axis
+  g_BoneMatrix7.rotate(g_leftLowerLegAngle, 1.0, 0.0, 0.0);
   g_BoneMatrix7.scale(2.5, leftLowerLegLength+1.0, 2.5);
 
   var weightLeftLowerLeg = weightLeftLowerArm;  
   
+  //RightUpperLeg
   g_BoneMatrix8 = popMatrix();
  
-  //RightUpperLeg
   var rightUpperLegLength = torsoHeight/2;
   g_BoneMatrix8.translate((torsoWidth/2)-rightUpperLegLength/2, 0.0, 0.0);
-  g_BoneMatrix8.rotate(g_rightUpperLegAngle, 0.0, 0.0, 1.0);  // Rotate around the y-axis
+  g_BoneMatrix8.rotate(g_rightUpperLegAngle, 0.0, 0.0, 1.0);  
 
   var weightRightUpperLeg = weightNeck;  
   
@@ -584,7 +584,7 @@ function draw(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, 
   g_BoneMatrix8.scale(3.0, rightUpperLegLength, 3.0);
   
   g_BoneMatrix9.translate(0.0, rightUpperLegLength, 0.0); 
-  g_BoneMatrix9.rotate(g_rightLowerLegAngle, 1.0, 0.0, 0.0);  // Rotate around the z-axis
+  g_BoneMatrix9.rotate(g_rightLowerLegAngle, 1.0, 0.0, 0.0);  
   g_BoneMatrix9.scale(2.5, rightLowerLegLength+1.0, 2.5);
  
   var weightRightLowerLeg = weightLeftLowerArm; 
@@ -817,7 +817,7 @@ function draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0,
 	0.0, 1.0,	0.0, 1.0,	0.0, 1.0,	0.0, 1.0,	
   ]); 
   
-    colors = new Float32Array([    
+    var colors = new Float32Array([    
     0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1, //front
     0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1, 
     0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1,  0.0, 0.5, 0.1, 			
@@ -886,7 +886,7 @@ function draw3(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0,
 	
   if (!initArrayBuffer(gl, 'a_TexCoord', textureCoords, gl.FLOAT, 2)) return -1;    
   
-  drawBox(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, g_BoneMatrix8, g_BoneMatrix11, weightFloor, texture); // Draw9  
+  drawBox(gl, n, viewProjMatrix, u_VpMatrix, u_NormalMatrix, u_BoneMatrix0, u_BoneMatrix1, g_BoneMatrix8, g_BoneMatrix11, weightFloor, texture);  
 }
 
 var g_matrixStack = []; 
