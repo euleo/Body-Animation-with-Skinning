@@ -1,7 +1,5 @@
 # Humanoid-Animation-with-Skinning
-Computer Graphics WebGL project
-
-Cubic robot with Star Wars Stormtrooper face
+Computer Graphics WebGL project: cubic robot with Star Wars Stormtrooper face
 
 To open with Chrome (on Windows):
 1. Open Command Prompt
